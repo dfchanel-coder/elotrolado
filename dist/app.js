@@ -92,6 +92,27 @@
     external.href = config.fallbackUrl.trim();
   }
 
+  // La señal directa es HTTP: se ofrece como último recurso para no romper el
+  // contenido mixto del sitio HTTPS.
+  var directAdded = false;
+  function showDirectLink() {
+    if (directAdded || !external) return;
+    var url = typeof config.directUrl === 'string' ? config.directUrl.trim() : '';
+    if (!url) return;
+    var paragraph = external.parentNode;
+    if (!paragraph) return;
+    var link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'Abrir la señal directa';
+    link.className = 'radio-direct';
+    paragraph.appendChild(document.createTextNode(' También podés '));
+    paragraph.appendChild(link);
+    paragraph.appendChild(document.createTextNode('.'));
+    directAdded = true;
+  }
+
   var streamUrl = typeof config.streamUrl === 'string' ? config.streamUrl.trim() : '';
   var mixedContent = streamUrl.indexOf('http://') === 0 && window.location.protocol === 'https:';
 
@@ -102,6 +123,7 @@
     setStatus('Señal en vivo · tocá play');
   } else if (mixedContent) {
     setStatus('Abrí el reproductor externo para escuchar');
+    showDirectLink();
   } else {
     setStatus('Señal próximamente');
   }
@@ -123,6 +145,7 @@
         play.disabled = false;
         setPlaying(false);
         setStatus('No pudimos conectar. Probá el reproductor externo.');
+        showDirectLink();
       });
     }
   });
@@ -159,5 +182,6 @@
     play.disabled = false;
     setPlaying(false);
     setStatus('Señal no disponible. Probá el reproductor externo.');
+    showDirectLink();
   });
 })();

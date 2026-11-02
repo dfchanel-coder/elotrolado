@@ -56,13 +56,15 @@ En `dist/config.js`:
 ```js
 window.RADIO_CONFIG = {
   streamUrl: 'https://cast1.asurahosting.com/proxy/radiom16/stream',
-  fallbackUrl: 'http://cast1.asurahosting.com:7724/stream',
+  fallbackUrl: 'https://cast1.asurahosting.com/start/radiom16/',
+  directUrl: 'http://cast1.asurahosting.com:7724/stream',
   name: 'El Otro Lado de la Cosa'
 };
 ```
 
 - `streamUrl` debe ser **HTTPS**: el sitio se publica por HTTPS y el navegador bloquea audio por HTTP (contenido mixto).
-- `fallbackUrl` es el enlace del reproductor externo que se muestra debajo del reproductor.
+- `fallbackUrl` es el enlace HTTPS al reproductor externo que se muestra debajo del reproductor.
+- `directUrl` es la señal directa del proveedor. Es HTTP, así que solo se ofrece como último recurso cuando el reproductor falla, para no romper el contenido mixto del sitio.
 
 > **Estado de la señal (AsuraHosting):** el stream actual es **AAC+ de 32 kbps** en `cast1.asurahosting.com:7724`. El proxy SSL oficial (`/proxy/radiom16/stream`) responde **502** porque el proxy de Asura solo trabaja con MP3. Para que el reproductor integrado funcione hay que pedirle a AsuraHosting que habilite el enlace SSL para el stream AAC o cambiar el mount a MP3. Mientras tanto, el enlace externo abre la señal directa.
 
