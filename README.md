@@ -73,7 +73,31 @@ Instagram, YouTube y TikTok están enlazados directamente en `dist/index.html`.
 
 ## Despliegue
 
-La carpeta publicada es `dist/`, tal como indica `.openai/hosting.json`. Cualquier hosting estático (GitHub Pages, Netlify, Vercel, Cloudflare Pages) puede publicar el contenido de `dist/` sin pasos de compilación.
+La carpeta publicada es `dist/`, tal como indica `.openai/hosting.json`.
+
+### GitHub Pages (automático)
+
+Cada push a `main` dispara el workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml), que publica `dist/` en GitHub Pages. No hay compilación: se sube la carpeta tal cual.
+
+- Sitio: <https://dfchanel-coder.github.io/elotrolado/>
+- Requisito (una sola vez): en **Settings → Pages → Build and deployment**, la fuente debe ser **GitHub Actions**.
+
+También se puede ejecutar a mano desde **Actions → Deploy to GitHub Pages → Run workflow**.
+
+### Dominio propio
+
+1. En **Settings → Pages → Custom domain** escribir el dominio (por ejemplo `elotroladodelacosa.com`) y guardar. GitHub crea el archivo `CNAME` en la rama de despliegue.
+2. Configurar el DNS en el proveedor del dominio:
+   - **Dominio raíz** (`elotroladodelacosa.com`): cuatro registros `A` apuntando a `185.199.108.153`, `185.199.109.153`, `185.199.110.153` y `185.199.111.153`.
+   - **Subdominio `www`**: un registro `CNAME` apuntando a `dfchanel-coder.github.io`.
+   - Opcional, IPv6: registros `AAAA` a `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153` y `2606:50c0:8003::153`.
+3. Esperar la propagación del DNS y activar **Enforce HTTPS** en la misma pantalla.
+
+El sitio usa rutas relativas, así que funciona igual bajo `usuario.github.io/repositorio/` o bajo un dominio propio.
+
+### Otros hostings
+
+Cualquier hosting estático (Netlify, Vercel, Cloudflare Pages) puede publicar el contenido de `dist/` sin pasos de compilación.
 
 ## Licencia
 
