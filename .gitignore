@@ -1,0 +1,48 @@
+# Sistema operativo
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Dependencias (si se agrega tooling en el futuro)
+node_modules/
+bower_components/
+.pnpm-store/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Temporales y caché
+*.tmp
+*.temp
+.cache/
+.temp/
+tmp/
+
+# Salidas de build propias de herramientas
+coverage/
+dist/*.map
+
+# Nota: dist/ NO se ignora, es el sitio publicado.
