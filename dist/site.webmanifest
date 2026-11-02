@@ -1,0 +1,32 @@
+{
+  "name": "El Otro Lado de la Cosa — Estudio & Radio",
+  "short_name": "EOL Radio",
+  "description": "Estudio de streaming y radio online en Uruguay. Tres estudios, operador incluido y señal 24/7.",
+  "lang": "es-UY",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#040b16",
+  "theme_color": "#04121f",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

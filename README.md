@@ -2,48 +2,47 @@
 
 Sitio web de **El Otro Lado de la Cosa**, un estudio de streaming y radio online con tres estudios, operador incluido y señal 24/7.
 
-El proyecto es un sitio **estático** (HTML + CSS + JavaScript, sin dependencias ni proceso de build). Todo el contenido publicado vive en la carpeta `dist/`.
+Sitio **estático** (HTML + CSS + JavaScript, sin dependencias ni proceso de build). Todo lo publicado vive en `dist/`.
 
-## Contenido del sitio
+🔗 **Producción:** <https://dfchanel-coder.github.io/elotrolado/>
 
-- **Inicio**: presentación del estudio y llamados a la acción.
-- **La radio**: reproductor de la señal online 24/7 con control de volumen.
-- **El estudio**: equipamiento disponible (OBSBOT, RØDE, Aircraft, NVIDIA RTX 5060, Elgato).
-- **Programas**: *Acá la gente habla*, *Café, mate y libertad* y *Zona de Debate*, con enlaces a YouTube e Instagram.
+## Secciones
+
+- **Inicio**: presentación del estudio, datos rápidos y llamados a la acción.
+- **Radio en vivo**: reproductor integrado, señal 24/7 y acceso al reproductor externo.
+- **El estudio**: equipamiento (OBSBOT, RØDE, Aircraft, NVIDIA RTX 5060, Elgato).
+- **Programas**: *Acá la gente habla*, *Café, mate y libertad* y *Zona de Debate*.
 - **Planes**: por hora, por espacio y plan mensual.
-- **Publicidad**: opciones para anunciar en la radio.
-- **Contacto**: WhatsApp y redes sociales.
+- **Publicidad**: espacios para marcas en la radio.
+- **Preguntas frecuentes**: contenido visible y marcado como `FAQPage`.
+- **Contacto**: WhatsApp y redes.
 
 ## Estructura
 
 ```
 .
-├── .openai/
-│   └── hosting.json     # Configuración de hosting estático (publica dist/)
-├── dist/                # Sitio publicado
-│   ├── index.html       # Página única
-│   ├── style.css        # Estilos
-│   ├── app.js           # Reproductor de radio y enlaces de WhatsApp
-│   ├── config.js        # Configuración editable (URL del stream)
-│   └── assets/
-│       └── programas.png
+├── .github/workflows/deploy-pages.yml   # Despliegue automático a GitHub Pages
+├── .openai/hosting.json                 # Hosting estático (publica dist/)
+├── dist/
+│   ├── index.html                       # Página única (HTML semántico + JSON-LD)
+│   ├── style.css                        # Sistema de diseño azul/cyan
+│   ├── app.js                           # Radio, menú móvil y enlaces de WhatsApp
+│   ├── config.js                        # URL del stream y respaldo
+│   ├── site.webmanifest                 # Manifiesto e íconos
+│   ├── robots.txt
+│   ├── sitemap.xml
+│   ├── llms.txt                         # Resumen para motores generativos (GEO/LLMO)
+│   ├── .nojekyll
+│   ├── .well-known/security.txt
+│   ├── assets/                          # Programas, OG image, favicons
+│   └── fonts/                           # Barlow Condensed + DM Sans (autoalojadas)
 └── README.md
 ```
 
 ## Ver el sitio en local
 
-Al ser estático, alcanza con servir la carpeta `dist/`. Abrir `index.html` con doble clic también funciona, pero un servidor local reproduce el comportamiento real.
-
-Con Python:
-
 ```bash
 python -m http.server 8000 --directory dist
-```
-
-Con Node.js:
-
-```bash
-npx serve dist
 ```
 
 Luego abrir <http://localhost:8000>.
@@ -52,53 +51,83 @@ Luego abrir <http://localhost:8000>.
 
 ### Radio online
 
-El reproductor se activa cuando se define la URL del stream en `dist/config.js`:
+En `dist/config.js`:
 
 ```js
 window.RADIO_CONFIG = {
-  streamUrl: 'https://tu-servidor.com/stream.mp3', // MP3 o AAC por HTTPS
+  streamUrl: 'https://cast1.asurahosting.com/proxy/radiom16/stream',
+  fallbackUrl: 'http://cast1.asurahosting.com:7724/stream',
   name: 'El Otro Lado de la Cosa'
 };
 ```
 
-Mientras `streamUrl` esté vacío, el botón de reproducción queda deshabilitado y se muestra "Señal próximamente".
+- `streamUrl` debe ser **HTTPS**: el sitio se publica por HTTPS y el navegador bloquea audio por HTTP (contenido mixto).
+- `fallbackUrl` es el enlace del reproductor externo que se muestra debajo del reproductor.
+
+> **Estado de la señal (AsuraHosting):** el stream actual es **AAC+ de 32 kbps** en `cast1.asurahosting.com:7724`. El proxy SSL oficial (`/proxy/radiom16/stream`) responde **502** porque el proxy de Asura solo trabaja con MP3. Para que el reproductor integrado funcione hay que pedirle a AsuraHosting que habilite el enlace SSL para el stream AAC o cambiar el mount a MP3. Mientras tanto, el enlace externo abre la señal directa.
 
 ### WhatsApp
 
-Los botones con el atributo `data-wa` arman automáticamente el enlace a WhatsApp con un mensaje precargado (ver `dist/app.js`). El número está definido en ese mismo archivo.
-
-### Redes y enlaces externos
-
-Instagram, YouTube y TikTok están enlazados directamente en `dist/index.html`.
-
-## Despliegue
-
-La carpeta publicada es `dist/`, tal como indica `.openai/hosting.json`.
-
-### GitHub Pages (automático)
-
-Cada push a `main` dispara el workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml), que publica `dist/` en GitHub Pages. No hay compilación: se sube la carpeta tal cual.
-
-- Sitio: <https://dfchanel-coder.github.io/elotrolado/>
-- Requisito (una sola vez): en **Settings → Pages → Build and deployment**, la fuente debe ser **GitHub Actions**.
-
-También se puede ejecutar a mano desde **Actions → Deploy to GitHub Pages → Run workflow**.
+Los elementos con `data-wa` generan el enlace a WhatsApp con mensaje precargado. El número se define en `dist/app.js` (`waNumber`).
 
 ### Dominio propio
 
-1. En **Settings → Pages → Custom domain** escribir el dominio (por ejemplo `elotroladodelacosa.com`) y guardar. GitHub crea el archivo `CNAME` en la rama de despliegue.
-2. Configurar el DNS en el proveedor del dominio:
-   - **Dominio raíz** (`elotroladodelacosa.com`): cuatro registros `A` apuntando a `185.199.108.153`, `185.199.109.153`, `185.199.110.153` y `185.199.111.153`.
-   - **Subdominio `www`**: un registro `CNAME` apuntando a `dfchanel-coder.github.io`.
-   - Opcional, IPv6: registros `AAAA` a `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153` y `2606:50c0:8003::153`.
-3. Esperar la propagación del DNS y activar **Enforce HTTPS** en la misma pantalla.
+Al conectar un dominio hay que actualizar la URL absoluta en:
 
-El sitio usa rutas relativas, así que funciona igual bajo `usuario.github.io/repositorio/` o bajo un dominio propio.
+1. `dist/index.html` → `<link rel="canonical">`, `og:url`, `og:image`, `twitter:image` y el JSON-LD.
+2. `dist/robots.txt` → línea `Sitemap`.
+3. `dist/sitemap.xml` → `<loc>`.
+4. `dist/llms.txt` → enlaces.
+5. `dist/.well-known/security.txt` → `Canonical`.
 
-### Otros hostings
+## SEO, GEO y LLMO
 
-Cualquier hosting estático (Netlify, Vercel, Cloudflare Pages) puede publicar el contenido de `dist/` sin pasos de compilación.
+- Título y descripción únicos, `canonical`, Open Graph y Twitter Cards.
+- JSON-LD con `Organization`, `RadioStation`, `WebSite`, `WebPage`, `Service` y `FAQPage`.
+- HTML semántico, jerarquía de encabezados y enlaces descriptivos.
+- `robots.txt`, `sitemap.xml` y `llms.txt` con datos verificables del estudio.
+- Contenido en español (es-UY) pensado para ser citado por buscadores y asistentes.
+
+## Seguridad
+
+- `Content-Security-Policy` restrictiva en meta (sin scripts ni estilos inline, sin orígenes externos salvo el audio).
+- `Referrer-Policy: strict-origin-when-cross-origin`.
+- Sin dependencias de terceros: fuentes e imágenes autoalojadas, sin analytics.
+- Enlaces externos con `rel="noopener noreferrer"`.
+- `.well-known/security.txt` para reporte de vulnerabilidades.
+- Todo el sitio se sirve por HTTPS.
+
+## Accesibilidad
+
+- Navegación por teclado, enlace "Saltar al contenido" y foco visible.
+- Landmarks (`header`, `nav`, `main`, `footer`) y `aria-label` en regiones.
+- Reproductor con `aria-pressed`, estado `aria-live` y controles etiquetados.
+- Contraste AA, objetivos táctiles de 44 px y `prefers-reduced-motion`.
+
+## Rendimiento
+
+- Fuentes autoalojadas con `preload` y `font-display: swap`.
+- Imagen de programas en AVIF/WebP con `srcset` (793 KB → 44 KB).
+- CSS y JS propios, sin frameworks ni librerías.
+- CLS 0 y TBT 0 ms en Lighthouse.
+
+**Lighthouse (local):** Rendimiento 99 · Accesibilidad 100 · Buenas prácticas 100 · SEO 100.
+
+## Despliegue
+
+Cada push a `main` dispara [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml), que publica `dist/` en GitHub Pages (sin build).
+
+Requisito único: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+### Dominio propio
+
+1. **Settings → Pages → Custom domain**, escribir el dominio y guardar.
+2. DNS:
+   - Raíz: registros `A` a `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
+   - `www`: `CNAME` a `dfchanel-coder.github.io`.
+   - Opcional IPv6: `AAAA` a `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`.
+3. Activar **Enforce HTTPS** (ya está activado en el repositorio).
 
 ## Licencia
 
-MIT — ver [LICENSE](LICENSE).
+MIT — ver [LICENSE](LICENSE). Desarrollado por [FB Informática](https://www.fbinformaticauy.com).

@@ -1,0 +1,36 @@
+# El Otro Lado de la Cosa
+
+> Estudio de streaming y radio online con base en Uruguay: tres estudios equipados, operador técnico incluido y una radio online que transmite las 24 horas.
+
+El Otro Lado de la Cosa es un estudio de producción de podcast, streaming y radio. Ofrece alquiler de estudios por hora, por espacio o con plan mensual, siempre con operador incluido. Su radio online emite música, programas y contenido propio las 24 horas y puede escucharse desde el sitio web.
+
+## Datos clave
+
+- Nombre: El Otro Lado de la Cosa (EOL Estudio & Radio).
+- Categoría: estudio de streaming, estudio de podcast y radio online.
+- País: Uruguay. Idioma: español (es-UY).
+- Estudios disponibles: 3.
+- Equipamiento: cámaras OBSBOT, micrófonos RØDE, consola Aircraft, PC con NVIDIA RTX 5060 y hardware Elgato.
+- Servicios: alquiler por hora, alquiler por espacio, plan mensual para programas y publicidad en radio.
+- Radio online: señal 24/7, reproductor integrado en el sitio.
+- Atención: WhatsApp +598 93 922 846.
+- Programas: Acá la gente habla; Café, mate y libertad; Zona de Debate.
+
+## Páginas
+
+- [Inicio](https://dfchanel-coder.github.io/elotrolado/): presentación del estudio, radio en vivo, equipamiento, programas, planes, preguntas frecuentes y contacto.
+
+## Enlaces oficiales
+
+- [YouTube](https://www.youtube.com/@ElotroLadodelacosa)
+- [Instagram](https://www.instagram.com/elotrolado.delacosa/)
+- [TikTok](https://www.tiktok.com/@elotrolado_de_la_cosa)
+
+## Contacto
+
+- WhatsApp: https://wa.me/59893922846
+- Radio en vivo: https://cast1.asurahosting.com/start/radiom16/
+
+## Notas de uso
+
+La información de esta página puede citarse indicando la fuente "El Otro Lado de la Cosa". Las tarifas y la disponibilidad se confirman por WhatsApp; el sitio no publica precios.

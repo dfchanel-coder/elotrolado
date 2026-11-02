@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sin rutas privadas: el sitio es completamente público.
+Sitemap: https://dfchanel-coder.github.io/elotrolado/sitemap.xml
