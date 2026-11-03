@@ -4,7 +4,7 @@ Sitio web de **El Otro Lado de la Cosa**, un estudio de streaming y radio online
 
 Sitio **estático** (HTML + CSS + JavaScript, sin dependencias ni proceso de build). Todo lo publicado vive en `dist/`.
 
-🔗 **Producción:** <https://dfchanel-coder.github.io/elotrolado/>
+🔗 **Producción:** <https://elotroladodelacosa.com/>
 
 ## Secciones
 
@@ -81,6 +81,7 @@ Al conectar un dominio hay que actualizar la URL absoluta en:
 3. `dist/sitemap.xml` → `<loc>`.
 4. `dist/llms.txt` → enlaces.
 5. `dist/.well-known/security.txt` → `Canonical`.
+6. `dist/CNAME` → dominio.
 
 ## SEO, GEO y LLMO
 
@@ -123,12 +124,15 @@ Requisito único: **Settings → Pages → Build and deployment → Source: GitH
 
 ### Dominio propio
 
-1. **Settings → Pages → Custom domain**, escribir el dominio y guardar.
-2. DNS:
-   - Raíz: registros `A` a `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
-   - `www`: `CNAME` a `dfchanel-coder.github.io`.
-   - Opcional IPv6: `AAAA` a `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`.
-3. Activar **Enforce HTTPS** (ya está activado en el repositorio).
+El dominio **elotroladodelacosa.com** ya está conectado a GitHub Pages con HTTPS forzado y certificado aprobado. El archivo `dist/CNAME` mantiene la configuración en cada despliegue.
+
+DNS actual:
+
+- Raíz: registros `A` a `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
+- `www`: `CNAME` a `dfchanel-coder.github.io`.
+- Opcional IPv6: `AAAA` a `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`.
+
+Las URLs absolutas (canonical, Open Graph, JSON-LD, `robots.txt`, `sitemap.xml`, `llms.txt` y `security.txt`) apuntan a `https://elotroladodelacosa.com/`.
 
 ## Licencia
 
