@@ -66,7 +66,7 @@ window.RADIO_CONFIG = {
 - `fallbackUrl` es el enlace HTTPS al reproductor externo que se muestra debajo del reproductor.
 - `directUrl` es la señal directa del proveedor. Es HTTP, así que solo se ofrece como último recurso cuando el reproductor falla, para no romper el contenido mixto del sitio.
 
-> **Estado de la señal (AsuraHosting):** el stream actual es **AAC+ de 32 kbps** en `cast1.asurahosting.com:7724`. El proxy SSL oficial (`/proxy/radiom16/stream`) responde **502** porque el proxy de Asura solo trabaja con MP3. Para que el reproductor integrado funcione hay que pedirle a AsuraHosting que habilite el enlace SSL para el stream AAC o cambiar el mount a MP3. Mientras tanto, el enlace externo abre la señal directa.
+> **Señal verificada el 5 de noviembre de 2026:** el proxy HTTPS responde 200 con `audio/mpeg` y se comprobó reproducción y pausa en navegador. La advertencia anterior sobre AAC/502 ya no describe el estado actual. La disponibilidad depende del proveedor.
 
 ### WhatsApp
 
@@ -137,3 +137,19 @@ Las URLs absolutas (canonical, Open Graph, JSON-LD, `robots.txt`, `sitemap.xml`,
 ## Licencia
 
 MIT — ver [LICENSE](LICENSE). Desarrollado por [FB Informática](https://www.fbinformaticauy.com).
+
+## Controles del sistema en iPhone y Android
+
+El reproductor publica el nombre de la emisora, “Radio en vivo · Uruguay” y una portada azul/cyan propia mediante Media Session. Incluye PNG opacos de 96 a 512 px, con URLs absolutas y la identidad de EOL. La misma portada aparece en el reproductor web.
+
+Los controles de reproducción, pausa y detención del sistema utilizan el mismo flujo que la página. Se sincroniza `playbackState`, se capturan errores de reproducción y no se anuncian saltos de pista ni una duración ficticia para el vivo. Las APIs opcionales están protegidas para navegadores con soporte parcial.
+
+En Safari/iOS, el sistema decide cómo mostrar estos datos en Now Playing, pantalla de bloqueo y, en modelos compatibles, Dynamic Island. No es una Live Activity nativa ni permite personalizar el diseño o las animaciones de la isla desde HTML. En Chrome/Android se personaliza la tarjeta multimedia; su ubicación, colores derivados y controles dependen del navegador, fabricante y versión. No se prometen portadas animadas ni una isla universal en Android.
+
+La conexión inicial y el buffering sin progreso tienen un límite de 15 segundos. Al agotarse, se cancela la conexión, se restaura el botón y se ofrece reintentar o abrir el reproductor externo. Cada nuevo intento vuelve a la señal en vivo; las promesas viejas no pisan el estado actual. Si el sistema suspende los temporizadores en segundo plano, el plazo se comprueba al volver a la página.
+
+### Verificación
+
+`node --test tests/radio.test.cjs` cubre espera agotada, reintento, errores, buffering, pausa y acciones Media Session, incluyendo soporte parcial. Para validar la apariencia nativa final, reproducir en un iPhone físico y un Android, bloquear la pantalla, expandir sus controles y probar pausa/reanudación con auriculares. Una vista responsive de escritorio no reproduce esas superficies del sistema.
+
+Referencias: [Media Session en Chrome](https://developer.chrome.com/blog/media-session), [Live Activities de Apple](https://developer.apple.com/documentation/activitykit/displaying-live-data-with-live-activities).

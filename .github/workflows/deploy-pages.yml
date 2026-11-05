@@ -24,6 +24,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Node for player checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check radio playback and Media Session
+        run: node --test tests/radio.test.cjs
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

@@ -128,60 +128,174 @@
     setStatus('Señal próximamente');
   }
 
-  play.addEventListener('click', function () {
-    if (!audio.src) return;
+  // Un solo flujo para la página, auriculares y controles del sistema.
+  var state = 'idle';
+  var wantsPlayback = false;
+  var attempt = 0;
+  var watchdog = null;
+  var deadline = 0;
+  var connectionTimeout = 15000;
+  var session = 'mediaSession' in navigator ? navigator.mediaSession : null;
 
-    if (!audio.paused) {
-      audio.pause();
-      return;
-    }
+  function clearWatchdog() {
+    window.clearTimeout(watchdog);
+    watchdog = null;
+    deadline = 0;
+  }
 
-    setStatus('Conectando con la radio…');
-    play.disabled = true;
+  function syncSession(value) {
+    if (!session) return;
+    try { session.playbackState = value; } catch (error) { /* API parcial */ }
+  }
 
-    var playback = audio.play();
-    if (playback && typeof playback.catch === 'function') {
-      playback.catch(function () {
-        play.disabled = false;
-        setPlaying(false);
-        setStatus('No pudimos conectar. Probá el reproductor externo.');
-        showDirectLink();
+  function updateMetadata() {
+    if (!session || typeof window.MediaMetadata !== 'function') return;
+    try {
+      session.metadata = new window.MediaMetadata({
+        title: config.name || 'El Otro Lado de la Cosa',
+        artist: 'Radio en vivo · Uruguay',
+        album: 'EOL · Estudio & Radio',
+        artwork: [96, 128, 192, 256, 384, 512].map(function (size) {
+          return {
+            src: new URL('assets/radio-cover-' + size + '.png', document.baseURI).href,
+            sizes: size + 'x' + size,
+            type: 'image/png'
+          };
+        })
       });
+    } catch (error) { /* La radio funciona aunque los metadatos no estén soportados. */ }
+  }
+
+  function failPlayback(message) {
+    if (!wantsPlayback) return;
+    wantsPlayback = false;
+    attempt += 1; // Ignorar rechazos de promesas anteriores.
+    state = 'error';
+    clearWatchdog();
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load(); // Cancela la conexión que quedó pendiente.
+    play.disabled = false;
+    setPlaying(false);
+    syncSession('paused');
+    setStatus(message);
+    showDirectLink();
+  }
+
+  function watchConnection() {
+    if (watchdog !== null || !wantsPlayback) return;
+    deadline = Date.now() + connectionTimeout;
+    watchdog = window.setTimeout(function () {
+      failPlayback('La señal está tardando. Tocá play para reintentar o abrí el reproductor externo.');
+    }, connectionTimeout);
+  }
+
+  function pausePlayback() {
+    wantsPlayback = false;
+    attempt += 1;
+    state = 'paused';
+    clearWatchdog();
+    audio.pause();
+    play.disabled = !streamUrl || mixedContent;
+    setPlaying(false);
+    syncSession('paused');
+    setStatus('Reproducción pausada');
+  }
+
+  function startPlayback() {
+    if (!streamUrl || mixedContent || wantsPlayback) return;
+    var currentAttempt = ++attempt;
+    wantsPlayback = true;
+    state = 'connecting';
+    clearWatchdog();
+    setPlaying(false);
+    play.disabled = true;
+    setStatus('Conectando con la radio…');
+    updateMetadata();
+    syncSession('paused');
+    watchConnection();
+    try {
+      // Reabrir el stream evita retomar audio viejo después de una pausa larga.
+      audio.src = streamUrl;
+      audio.load();
+      var playback = audio.play();
+      if (playback && typeof playback.catch === 'function') {
+        playback.catch(function () {
+          if (currentAttempt !== attempt || !wantsPlayback) return;
+          failPlayback('No pudimos conectar. Tocá play para reintentar o probá el reproductor externo.');
+        });
+      }
+    } catch (error) {
+      failPlayback('No pudimos conectar. Tocá play para reintentar o probá el reproductor externo.');
     }
+  }
+
+  play.addEventListener('click', function () {
+    if (wantsPlayback) pausePlayback();
+    else startPlayback();
   });
 
   audio.addEventListener('playing', function () {
+    if (!wantsPlayback) { audio.pause(); return; }
+    clearWatchdog();
+    state = 'playing';
     play.disabled = false;
     setPlaying(true);
+    syncSession('playing');
     setStatus('Escuchando en vivo');
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new window.MediaMetadata({
-        title: 'Radio online 24/7',
-        artist: config.name || 'El Otro Lado de la Cosa',
-        album: 'El Otro Lado de la Cosa'
-      });
-      navigator.mediaSession.setActionHandler('play', function () { audio.play(); });
-      navigator.mediaSession.setActionHandler('pause', function () { audio.pause(); });
-    }
   });
 
   audio.addEventListener('pause', function () {
-    setPlaying(false);
-    setStatus('Reproducción pausada');
+    // load() puede emitir pause al reiniciar; no cancelar el nuevo intento.
+    if (wantsPlayback && audio.paused && state !== 'connecting') pausePlayback();
   });
 
-  audio.addEventListener('waiting', function () {
-    setStatus('Cargando señal…');
-  });
-
-  audio.addEventListener('stalled', function () {
+  function buffering() {
+    if (!wantsPlayback) return;
+    if (state !== 'connecting') state = 'buffering';
     setStatus('Reconectando con la señal…');
+    watchConnection();
+  }
+  audio.addEventListener('waiting', buffering);
+  audio.addEventListener('stalled', function () {
+    // stalled también puede ocurrir mientras queda audio reproducible en el búfer.
+    if (audio.readyState < 3) buffering();
+  });
+  audio.addEventListener('timeupdate', function () {
+    if (wantsPlayback && state === 'buffering' && !audio.paused && audio.readyState >= 3) {
+      clearWatchdog();
+      state = 'playing';
+      setStatus('Escuchando en vivo');
+    }
+  });
+  audio.addEventListener('error', function () {
+    failPlayback('Señal no disponible. Tocá play para reintentar o probá el reproductor externo.');
+  });
+  audio.addEventListener('ended', function () {
+    failPlayback('La señal se interrumpió. Tocá play para volver al vivo.');
+  });
+  document.addEventListener('visibilitychange', function () {
+    // Los móviles pueden suspender timers cuando la página queda en segundo plano.
+    if (!document.hidden && wantsPlayback && deadline && Date.now() >= deadline) {
+      failPlayback('La conexión se agotó. Tocá play para volver al vivo.');
+    }
   });
 
-  audio.addEventListener('error', function () {
-    play.disabled = false;
-    setPlaying(false);
-    setStatus('Señal no disponible. Probá el reproductor externo.');
-    showDirectLink();
-  });
+  if (session) {
+    function handle(action, callback) {
+      try { session.setActionHandler(action, callback); } catch (error) { /* Acción no soportada */ }
+    }
+    handle('play', startPlayback);
+    handle('pause', pausePlayback);
+    handle('stop', function () {
+      pausePlayback();
+      audio.removeAttribute('src');
+      audio.load();
+      syncSession('none');
+    });
+    // Es una señal en vivo: no simular pistas, duración ni desplazamiento temporal.
+    ['seekbackward', 'seekforward', 'seekto', 'previoustrack', 'nexttrack'].forEach(function (action) {
+      handle(action, null);
+    });
+  }
 })();
